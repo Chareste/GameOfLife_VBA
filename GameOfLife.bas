@@ -81,12 +81,12 @@ End Sub
 Private Function CheckNeighbors(c As Range) As Integer
     Dim count As Integer
     count = 0
-    For i = -1 To 1
-    If c.Row + i < 1 Or c.Row + i > rowNr Then GoTo NextRow
+    For I = -1 To 1
+    If c.Row + I < 1 Or c.Row + I > rowNr Then GoTo NextRow
         For j = -1 To 1
             If c.Column + j < 1 Or c.Column + j > colNr Then GoTo NextCol
-            If i = 0 And j = 0 Then GoTo NextCol ' neighbors only!
-            If c.Offset(i, j).Interior.ColorIndex = ALIVE Then
+            If I = 0 And j = 0 Then GoTo NextCol ' neighbors only!
+            If c.Offset(I, j).Interior.ColorIndex = ALIVE Then
                 count = count + 1
             End If
 NextCol:
@@ -104,16 +104,17 @@ End Function
 '
 Private Function UpdateBoard(a As Range) As Boolean
     For Each cell In a
-        If cell.ID = "ALIVE" Then
-            cell.Interior.ColorIndex = ALIVE
-            cell.ID = "BLANK"
-        ElseIf cell.ID = "DEAD" Then
-            cell.Interior.ColorIndex = DEAD
-            cell.ID = "BLANK"
-        End If
+        With cell
+            If .ID = "ALIVE" Then
+                .Interior.ColorIndex = ALIVE
+                .ID = "BLANK"
+            ElseIf .ID = "DEAD" Then
+                .Interior.ColorIndex = DEAD
+                .ID = "BLANK"
+            End If
+        End With
     Next
     ' Debug.Print "Round " & RoundNr & " complete"
-    'Application.Calculate
     UpdateBoard = True
 End Function
 
@@ -125,10 +126,17 @@ End Function
 '
 Private Function generateStart(a As Range) As Boolean
     ' set the grid layout
-    a.RowHeight = 17
-    a.ColumnWidth = 2
-    a.BorderAround xlDashDot, xlMedium
-    Range("A1").AddComment "Start"
+    With a
+        .RowHeight = 17
+        .ColumnWidth = 2
+        .BorderAround xlDashDot, xlMedium
+    End With
+    
+    With Range("A1")
+        If .Comment Is Nothing Then
+            .AddComment "Start"
+        End If
+    End With
 
     For Each cell In a
         If cell.Interior.ColorIndex = xlNone Then
@@ -147,12 +155,18 @@ End Function
 ' resets the game grid
 '
 Sub cleanGrid()
-    Range("A1").Comment.Delete
+    With Range("A1")
+        If Not .Comment Is Nothing Then
+            .Comment.Delete
+        End If
+    End With
     
     For Each cell In Cells(1, 1).Resize(rowNr, colNr)
-        cell.Interior.ColorIndex = xlNone
-        cell.Borders.LineStyle = xlNone
-        cell.ID = "BLANK"
+        With cell
+            .Interior.ColorIndex = xlNone
+            .Borders.LineStyle = xlNone
+            .ID = "BLANK"
+        End With
     Next
 End Sub
  
